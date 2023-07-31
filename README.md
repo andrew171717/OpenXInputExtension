@@ -24,7 +24,7 @@ On game end, call `gamepad_oxi_quit()`.
 ## More Details
 This extension relys on the open-source project OpenXInput which can be found [here](https://github.com/Nemirtingas/OpenXinput/tree/OpenXinput1_4).
 
-There is a build of OpenXinput's dll (OpenXinput1_4.dll, originally named Xinput1_4.dll) within the .yymaps file found within the release. This was done to help those who do not wish to rebuild the dll themselves. However, I do encourage you to download and build [OpenXInput](https://github.com/Nemirtingas/OpenXinput/tree/OpenXinput1_4) if you are familiar with C++ and CMake.
+There is a build of OpenXinput's dll (OpenXinput1_4.dll, originally named Xinput1_4.dll) within the .yymaps file found within the release of this project. This was done to help those who do not wish to rebuild the dll themselves. However, I do encourage you to download and build [OpenXInput](https://github.com/Nemirtingas/OpenXinput/tree/OpenXinput1_4) if you are familiar with C++ and CMake.
 
 
 
