@@ -14,7 +14,7 @@ On game end, call `gamepad_oxi_quit()`.
 
 ## Building Instructions
 - Step 1: Download the OpenXInput1_4 code from [here](https://github.com/Nemirtingas/OpenXinput/tree/OpenXinput1_4)
-- Step 2: Download OpenXInputExtension's code.
+- Step 2: Download OpenXInputExtension's code [here](https://github.com/andrew171717/OpenXInputExtension/archive/refs/heads/main.zip).
 - Step 3: Move the folder `GMOpenXInputExtension` from OpenXInputExtension into OpenXInput1_4's working directory.
 - Step 4: Replace the file `CMakeLists.txt` in OpenXInput1_4's working directory with the version found in OpenXInputExtension.
   - Your build environment should look something like this ![image](https://github.com/andrew171717/OpenXInputExtension/assets/25375491/28a8e2d8-dd7f-49ab-9221-faeb9f85e1e5)
