@@ -7,7 +7,7 @@ Import the local package.
 On game start, call `gamepad_oxi_init()`.
 
 During gameplay call `gamepad_button_check_oxi(deviceIndex, buttonIndex)`.
-- `deviceIndex`: `0-7` (the current release it setup to support 8 controllers, but this can be extended by rebuilding the OpenXInput with a larger number set.)
+- `deviceIndex`: `0-7` (the current release it setup to support 8 controllers, but this can be extended by rebuilding the [OpenXInput](https://github.com/Nemirtingas/OpenXinput/tree/OpenXinput1_4) dll with a larger number set.)
 - `buttonIndex`: Current button supports: `gp_face1`, `gp_face2`, `gp_face3`, `gp_face4`, `gp_shoulderl`, `gp_shoulderr`, `gp_shoulderlb`, `gp_shoulderrb`, `gp_padu`, `gp_padd`, `gp_padl`, `gp_padr`, `gp_start`, `gp_select`
 
 On game end, call `gamepad_oxi_quit()`.
