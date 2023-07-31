@@ -17,7 +17,7 @@ On game end, call `gamepad_oxi_quit()`.
 - Step 2: Download OpenXInputExtension's code [here](https://github.com/andrew171717/OpenXInputExtension/archive/refs/heads/main.zip).
 - Step 3: Move the folder `GMOpenXInputExtension` from OpenXInputExtension into OpenXInput1_4's working directory.
 - Step 4: Replace the file `CMakeLists.txt` in OpenXInput1_4's working directory with the version found in OpenXInputExtension.
-  - Your build environment should look something like this ![image](https://github.com/andrew171717/OpenXInputExtension/assets/25375491/28a8e2d8-dd7f-49ab-9221-faeb9f85e1e5)
+  - Your build environment should look something like this ![image](https://github.com/andrew171717/OpenXInputExtension/assets/25375491/fd118b47-c2e5-4125-adef-1a0a14f08cd0)
 - Step 5: Open OpenXInput1_4's folder in Visual Studio (I used v2022) and wait for Visual Studio to build out the CMake file (you must have CMake support setup in Visual Studio).
 - Step 6: You should be able to click build all in Visual Studio to compile the dll.
 
