@@ -90,6 +90,33 @@ set_target_properties(${LIBRARY_NAME}
 )
 
 ##################
+## Examples
+if(${OPENXINPUT_BUILD_EXAMPLE})
+
+add_executable(openxinput_example
+  example/main.cpp
+)
+
+target_link_libraries(openxinput_example
+  PRIVATE
+  ${LIBRARY_NAME}
+)
+
+target_include_directories(openxinput_example
+  PRIVATE
+  src/
+)
+
+set_target_properties(openxinput_example
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
+endif()
+
+##################
 ## GameMaker Extension
 if(${OPENXINPUT_BUILD_EXTENSION})
 
@@ -117,26 +144,15 @@ set_target_properties(OpenXInputExtension
 endif()
 
 ##################
-## Examples
-if(${OPENXINPUT_BUILD_EXAMPLE})
+## Install rules
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(openxinput_example
-  example/main.cpp
+install(
+  TARGETS ${LIBRARY_NAME}
+  RUNTIME DESTINATION "output/bin"
+  LIBRARY DESTINATION "output/lib"
 )
 
-target_link_libraries(openxinput_example
-  PRIVATE
-  ${LIBRARY_NAME}
-)
-
-target_include_directories(openxinput_example
-  PRIVATE
-  src/
-)
-
-set_target_properties(openxinput_example
-    PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+install(FILES
+  $<$<AND:$<BOOL:${BUILD_SHARED_LIBS}>,$<BOOL:${MSVC}>>:$<TARGET_PDB_FILE:${LIBRARY_NAME}>> DESTINATION "output/pdb" OPTIONAL
 )
