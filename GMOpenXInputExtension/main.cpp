@@ -115,7 +115,7 @@ HMODULE LoadDllByName(const std::wstring& dllName) {
 
 #pragma region Gamemaker_Extension_Code
 #define GAMEPAD_DEADZONE_TRIGGER 150
-enum GameMakerGamepadIDs
+enum GameMakerGamepadButtonIDs
 {
     gp_face1 = 32769, // A
     gp_face2 = 32770, // B
@@ -125,14 +125,18 @@ enum GameMakerGamepadIDs
     gp_shoulderr = 32774, // Right Bumper
     gp_shoulderlb = 32775, // Left Trigger
     gp_shoulderrb = 32776, // Right Trigger
+    gp_select = 32777, // Select (left menu button)
+    gp_start = 32778, // Start (right menu button)
+    gp_stickl = 32779, // Left Thumb Stick
+    gp_stickr = 32780, // Right Thumb Stick
     gp_padu = 32781, // Up
     gp_padd = 32782, // Down
     gp_padl = 32783, // Left
     gp_padr = 32784, // Right
-    gp_start = 32778, // Start (right menu button)
-    gp_select = 32777, // Select (left menu button)
     gp_axislh = 32785, // Analog Stick Left Horizontal
     gp_axislv = 32786, // Analog Stick Left Vertical
+    gp_axisrh = 32787, // Analog Stick Right Horizontal
+    gp_axisrv = 32788  // Analog Stick Right Vertical
 };
 
 #define fn_export extern "C" __declspec (dllexport)
@@ -156,13 +160,37 @@ fn_export double gamepad_oxi_init()
 
     devices = std::make_unique<XInputDevice_t[]>(XinputMaxControllerCount);
     memset(devices.get(), 0, sizeof(XInputDevice_t) * XinputMaxControllerCount);
-
+    
     for (int i = 0; i < XinputMaxControllerCount; ++i)
     {
         devices[i].deviceIndex = i;
     }
 
-    return XinputMaxControllerCount;
+    return 0;
+}
+
+fn_export double gamepad_oxi_update()
+{
+    for (int i = 0; i < XinputMaxControllerCount; ++i)
+    {
+        XInputDevice_t& controller = devices[i];
+        if ((pOpenXInputGetStateFull == nullptr ? OpenXInputGetStateEx(i, &controller.state.XinputState) : pOpenXInputGetStateFull(i, &controller.state)) == ERROR_SUCCESS)
+        {
+            if (!controller.connected)
+            {
+                OnDeviceConnect(controller);
+            }
+            else
+            {
+                OnDeviceInfoChange(controller);
+            }
+        }
+        else
+        {
+            OnDeviceDisconnect(controller);
+        }
+    }
+    return 0;
 }
 
 fn_export double gamepad_oxi_quit() 
@@ -173,21 +201,14 @@ fn_export double gamepad_oxi_quit()
 
 fn_export double gamepad_button_check_oxi(double device, double button)
 {
-    GameMakerGamepadIDs gp_button = (GameMakerGamepadIDs)(int)button;
-    XInputDevice_t& controller = devices[device];
-    if ((pOpenXInputGetStateFull == nullptr ? OpenXInputGetStateEx(device, &controller.state.XinputState) : pOpenXInputGetStateFull(device, &controller.state)) == ERROR_SUCCESS)
+    try 
     {
-        if (!controller.connected) 
+        GameMakerGamepadButtonIDs gp_button = (GameMakerGamepadButtonIDs)(int)button;
+        XInputDevice_t& controller = devices[device];
+        if ((pOpenXInputGetStateFull == nullptr ? OpenXInputGetStateEx(device, &controller.state.XinputState) : pOpenXInputGetStateFull(device, &controller.state)) == ERROR_SUCCESS)
         {
-            OnDeviceConnect(controller);
-        }
-        else 
-        {
-            OnDeviceInfoChange(controller);
-        }
-
-        switch (gp_button)
-        {
+            switch (gp_button)
+            {
             case gp_face1: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0);
             case gp_face2: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0);
             case gp_face3: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0);
@@ -202,14 +223,90 @@ fn_export double gamepad_button_check_oxi(double device, double button)
             case gp_padr: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0);
             case gp_start: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0);
             case gp_select: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0);
+            case gp_stickl: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0);
+            case gp_stickr: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0);
             default: return 0;
+            }
         }
     }
-    else 
+    catch (...) 
     {
-        OnDeviceDisconnect(controller);
-    }
 
+    }
+    return 0;
+}
+
+fn_export double gamepad_button_check_pressed_oxi(double device, double button)
+{
+    try
+    {
+        GameMakerGamepadButtonIDs gp_button = (GameMakerGamepadButtonIDs)(int)button;
+        XInputDevice_t& controller = devices[device];
+        if ((pOpenXInputGetStateFull == nullptr ? OpenXInputGetStateEx(device, &controller.state.XinputState) : pOpenXInputGetStateFull(device, &controller.state)) == ERROR_SUCCESS)
+        {
+            switch (gp_button)
+            {
+                case gp_face1: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0));
+                case gp_face2: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0));
+                case gp_face3: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0));
+                case gp_face4: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0));
+                case gp_shoulderl: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0));
+                case gp_shoulderr: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0));
+                case gp_shoulderlb: return (((controller.state.XinputState.Gamepad.bLeftTrigger) > GAMEPAD_DEADZONE_TRIGGER) && !((controller.oldState.XinputState.Gamepad.bLeftTrigger) > GAMEPAD_DEADZONE_TRIGGER));
+                case gp_shoulderrb: return (((controller.state.XinputState.Gamepad.bRightTrigger) > GAMEPAD_DEADZONE_TRIGGER) && !((controller.oldState.XinputState.Gamepad.bRightTrigger) > GAMEPAD_DEADZONE_TRIGGER));
+                case gp_padu: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0));
+                case gp_padd: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0));
+                case gp_padl: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0));
+                case gp_padr: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0));
+                case gp_start: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0));
+                case gp_select: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0));
+                case gp_stickl: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0));
+                case gp_stickr: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0));
+                default: return 0;
+            }
+        }
+    }
+    catch (...) 
+    {
+
+    }
+    return 0;
+}
+
+fn_export double gamepad_button_check_released_oxi(double device, double button)
+{
+    try
+    {
+        GameMakerGamepadButtonIDs gp_button = (GameMakerGamepadButtonIDs)(int)button;
+        XInputDevice_t& controller = devices[device];
+        if ((pOpenXInputGetStateFull == nullptr ? OpenXInputGetStateEx(device, &controller.state.XinputState) : pOpenXInputGetStateFull(device, &controller.state)) == ERROR_SUCCESS)
+        {
+            switch (gp_button)
+            {
+                case gp_face1: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0));
+                case gp_face2: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0));
+                case gp_face3: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0));
+                case gp_face4: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0));
+                case gp_shoulderl: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0));
+                case gp_shoulderr: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0));
+                case gp_shoulderlb: return (!((controller.state.XinputState.Gamepad.bLeftTrigger) > GAMEPAD_DEADZONE_TRIGGER) && ((controller.oldState.XinputState.Gamepad.bLeftTrigger) > GAMEPAD_DEADZONE_TRIGGER));
+                case gp_shoulderrb: return (!((controller.state.XinputState.Gamepad.bRightTrigger) > GAMEPAD_DEADZONE_TRIGGER) && ((controller.oldState.XinputState.Gamepad.bRightTrigger) > GAMEPAD_DEADZONE_TRIGGER));
+                case gp_padu: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0));
+                case gp_padd: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0));
+                case gp_padl: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0));
+                case gp_padr: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0));
+                case gp_start: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0));
+                case gp_select: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0));
+                case gp_stickl: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0));
+                case gp_stickr: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0));
+                default: return 0;
+            }
+        }
+    }
+    catch (...) 
+    {
+
+    }
     return 0;
 }
 
