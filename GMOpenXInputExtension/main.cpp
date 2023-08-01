@@ -35,6 +35,7 @@ struct XInputDevice_t
     WORD vendorId;
     WORD productId;
     WORD inputId;
+    double deadzone;
 };
 
 static DWORD XinputMaxControllerCount = XUSER_MAX_COUNT;
@@ -115,6 +116,7 @@ HMODULE LoadDllByName(const std::wstring& dllName) {
 
 #pragma region Gamemaker_Extension_Code
 #define GAMEPAD_DEADZONE_TRIGGER 150
+#define GAMEPAD_STICK_MAX 32768
 enum GameMakerGamepadButtonIDs
 {
     gp_face1 = 32769, // A
@@ -212,8 +214,8 @@ fn_export double gamepad_button_check_oxi(double device, double button)
             {
                 case gp_face1: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0);
                 case gp_face2: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0);
-                case gp_face3: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0);
-                case gp_face4: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0);
+                case gp_face3: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0);
+                case gp_face4: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0);
                 case gp_shoulderl: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0);
                 case gp_shoulderr: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0);
                 case gp_shoulderlb: return ((controller.state.XinputState.Gamepad.bLeftTrigger) > GAMEPAD_DEADZONE_TRIGGER);
@@ -249,8 +251,8 @@ fn_export double gamepad_button_check_pressed_oxi(double device, double button)
             {
                 case gp_face1: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0));
                 case gp_face2: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0));
-                case gp_face3: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0));
-                case gp_face4: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0));
+                case gp_face3: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0));
+                case gp_face4: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0));
                 case gp_shoulderl: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0));
                 case gp_shoulderr: return (((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0) && !((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0));
                 case gp_shoulderlb: return (((controller.state.XinputState.Gamepad.bLeftTrigger) > GAMEPAD_DEADZONE_TRIGGER) && !((controller.oldState.XinputState.Gamepad.bLeftTrigger) > GAMEPAD_DEADZONE_TRIGGER));
@@ -286,8 +288,8 @@ fn_export double gamepad_button_check_released_oxi(double device, double button)
             {
                 case gp_face1: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0));
                 case gp_face2: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0));
-                case gp_face3: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0));
-                case gp_face4: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0));
+                case gp_face3: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0));
+                case gp_face4: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0));
                 case gp_shoulderl: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0));
                 case gp_shoulderr: return (!((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0) && ((controller.oldState.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0));
                 case gp_shoulderlb: return (!((controller.state.XinputState.Gamepad.bLeftTrigger) > GAMEPAD_DEADZONE_TRIGGER) && ((controller.oldState.XinputState.Gamepad.bLeftTrigger) > GAMEPAD_DEADZONE_TRIGGER));
@@ -311,4 +313,39 @@ fn_export double gamepad_button_check_released_oxi(double device, double button)
     return 0;
 }
 
+fn_export double gamepad_set_axis_deadzone_oxi(double device, double deadzone)
+{
+    XInputDevice_t& controller = devices[device];
+    controller.deadzone = deadzone;
+    return 0;
+}
+
+fn_export double gamepad_axis_value_oxi(double device, double axis)
+{
+    try
+    {
+        GameMakerGamepadButtonIDs gp_axis = (GameMakerGamepadButtonIDs)(int)axis;
+        XInputDevice_t& controller = devices[device];
+        if (controller.connected)
+        {
+            double normalizedValue = 0;
+            switch (gp_axis)
+            {
+                case gp_axislh: normalizedValue = ((double)controller.state.XinputState.Gamepad.sThumbLX / (double)GAMEPAD_STICK_MAX); break;
+                case gp_axislv: normalizedValue = -((double)controller.state.XinputState.Gamepad.sThumbLY / (double)GAMEPAD_STICK_MAX); break;
+                case gp_axisrh: normalizedValue = ((double)controller.state.XinputState.Gamepad.sThumbRX / (double)GAMEPAD_STICK_MAX); break;
+                case gp_axisrv: normalizedValue = -((double)controller.state.XinputState.Gamepad.sThumbRY / (double)GAMEPAD_STICK_MAX); break;
+                default: return 0;
+            }
+
+            if (std::abs(normalizedValue) < controller.deadzone) { return 0; }
+            return normalizedValue;
+        }
+    }
+    catch (...)
+    {
+
+    }
+    return 0;
+}
 #pragma endregion Gamemaker_Extension_Code
