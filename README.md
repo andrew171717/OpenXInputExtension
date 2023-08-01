@@ -2,7 +2,7 @@
 An open-source extension to be used with GameMaker to allow for more than 4 XInput devices. The current version of this project is limited on what it can do, but I plan to flesh it out over the next coming weeks. I have tested this extension with 6 XInput controllers, but it should work with up to 8.
 
 # Usage
-Import the local package.
+Import the local package to your project.
 
 On game start, call `gamepad_oxi_init()`.
 
