@@ -181,7 +181,7 @@ fn_export double gamepad_oxi_update()
 
         if ((pOpenXInputGetStateFull == nullptr ? OpenXInputGetStateEx(i, &controller.state.XinputState) : pOpenXInputGetStateFull(i, &controller.state)) == ERROR_SUCCESS)
         {
-            if (controller.connected == false)
+            if (!controller.connected)
             {
                 OnDeviceConnect(controller);
             }
@@ -191,7 +191,7 @@ fn_export double gamepad_oxi_update()
             OnDeviceDisconnect(controller);
         }
     }
-    return 1;
+    return 0;
 }
 
 fn_export double gamepad_oxi_quit() 
