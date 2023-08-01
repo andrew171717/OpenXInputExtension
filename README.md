@@ -1,14 +1,20 @@
 # GameMaker OpenXInputExtension
 An open-source extension to be used with GameMaker to allow for more than 4 XInput devices. The current version of this project is limited on what it can do, but I plan to flesh it out over the next coming weeks. I have tested this extension with 6 XInput controllers, but it should work with up to 8.
 
-## Usage
+# Usage
 Import the local package.
 
 On game start, call `gamepad_oxi_init()`.
 
-During gameplay call `gamepad_button_check_oxi(deviceIndex, buttonIndex)`.
-- `deviceIndex`: `0-7` (the current release it setup to support 8 controllers, but this can be extended by rebuilding the [OpenXInput](https://github.com/Nemirtingas/OpenXinput/tree/OpenXinput1_4) dll with a larger number set.)
-- `buttonIndex`: Current button supports: `gp_face1`, `gp_face2`, `gp_face3`, `gp_face4`, `gp_shoulderl`, `gp_shoulderr`, `gp_shoulderlb`, `gp_shoulderrb`, `gp_padu`, `gp_padd`, `gp_padl`, `gp_padr`, `gp_start`, `gp_select`
+At the start of each step (Begin Step), call `gamepad_oxi_update()`.
+
+Button functions: `gamepad_button_check_oxi(deviceIndex, buttonIndex)`, `gamepad_button_check_pressed_oxi(deviceIndex, buttonIndex)`, and `gamepad_button_check_released_oxi(deviceIndex, buttonIndex)` .
+- `deviceIndex`: `0`-`7` (the current release it setup to support 8 controllers, but this can be extended by rebuilding the OpenXInput with a larger number set.)
+- `buttonIndex`: `gp_face1`, `gp_face2`, `gp_face3`, `gp_face4`, `gp_shoulderl`, `gp_shoulderr`, `gp_shoulderlb`, `gp_shoulderrb`, `gp_padu`, `gp_padd`, `gp_padl`, `gp_padr`, `gp_start`, `gp_select`, `gp_stickl`, `gp_stickr`
+
+Axis Functions: `gamepad_set_axis_deadzone_oxi(deviceIndex, deadzone)` and  `gamepad_axis_value_oxi(deviceIndex, axisIndex)`
+- `deviceIndex`: `0`-`7` (the current release it setup to support 8 controllers, but this can be extended by rebuilding the OpenXInput with a larger number set.)
+- `axisIndex`: `gp_axislh`, `gp_axislv`, `gp_axisrh`, `gp_axisrv`
 
 On game end, call `gamepad_oxi_quit()`.
 
