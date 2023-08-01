@@ -21,9 +21,6 @@
 #include <thread>
 #include <iostream>
 
-#include <windows.h>
-#include <string>
-
 struct XInputDevice_t
 {
     bool connected;

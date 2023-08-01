@@ -13,7 +13,7 @@ set(OPENXINPUT_XUSER_MAX_COUNT 8 CACHE STRING "Max controller count supported by
 
 option(OPENXINPUT_BUILD_EXTENSION    "Build OpenXInputExtension." ON)
 
-option(OPENXINPUT_BUILD_EXAMPLE    "Build OpenXinput example." OFF)
+option(OPENXINPUT_BUILD_EXAMPLE    "Build OpenXinput example." ON)
 
 option(BUILD_SHARED_LIBS "Build OpenXinput as a Xinput replacement. If set to no, all exported library functions will be prepended with 'Open', like 'OpenXinputGetState'." ON)
 
@@ -90,6 +90,45 @@ set_target_properties(${LIBRARY_NAME}
 )
 
 ##################
+## GameMaker Extension
+if(${OPENXINPUT_BUILD_EXTENSION})
+
+add_library(OpenXInputExtension
+  GMOpenXInputExtension/main.cpp
+)
+
+# Set the build type to Release
+set(CMAKE_BUILD_TYPE "Release")
+
+# Add compiler and linker flags to control the runtime library
+if(MSVC)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:msvcp140d")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:vcruntime140d")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:vcruntime140_1d")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:ucrtbased")
+endif()
+
+target_link_libraries(OpenXInputExtension
+  PRIVATE
+  ${LIBRARY_NAME}
+)
+
+target_include_directories(OpenXInputExtension
+  PRIVATE
+  src/
+)
+
+set_target_properties(OpenXInputExtension
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
+endif()
+
+##################
 ## Examples
 if(${OPENXINPUT_BUILD_EXAMPLE})
 
@@ -108,33 +147,6 @@ target_include_directories(openxinput_example
 )
 
 set_target_properties(openxinput_example
-    PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-)
-
-endif()
-
-##################
-## GameMaker Extension
-if(${OPENXINPUT_BUILD_EXTENSION})
-
-add_library(OpenXInputExtension
-  GMOpenXInputExtension/main.cpp
-)
-
-target_link_libraries(OpenXInputExtension
-  PRIVATE
-  ${LIBRARY_NAME}
-)
-
-target_include_directories(OpenXInputExtension
-  PRIVATE
-  src/
-)
-
-set_target_properties(OpenXInputExtension
     PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
