@@ -114,6 +114,7 @@ HMODULE LoadDllByName(const std::wstring& dllName) {
 #pragma region Gamemaker_Extension_Code
 #define GAMEPAD_DEADZONE_TRIGGER 150
 #define GAMEPAD_STICK_MAX 32768
+#define GAMEPAD_VIBRATE_MAX 65535
 enum GameMakerGamepadButtonIDs
 {
     gp_face1 = 32769, // A
@@ -144,59 +145,81 @@ HMODULE hXinput;
 
 fn_export double gamepad_oxi_init()
 {
-    hXinput = LoadDllByName(L"OpenXinput1_4.dll");
-    if (hXinput != NULL)
+    try 
     {
-        OpenXInputGetMaxControllerCount_t* pfnOpenXInputGetMaxControllerCount_t = (OpenXInputGetMaxControllerCount_t*)GetProcAddress(hXinput, "OpenXInputGetMaxControllerCount");
-        if (pfnOpenXInputGetMaxControllerCount_t != nullptr)
-        {// We are using OpenXinput, check for the max controller count.
-            XinputMaxControllerCount = pfnOpenXInputGetMaxControllerCount_t();
+        hXinput = LoadDllByName(L"OpenXinput1_4.dll");
+        if (hXinput != NULL)
+        {
+            OpenXInputGetMaxControllerCount_t* pfnOpenXInputGetMaxControllerCount_t = (OpenXInputGetMaxControllerCount_t*)GetProcAddress(hXinput, "OpenXInputGetMaxControllerCount");
+            if (pfnOpenXInputGetMaxControllerCount_t != nullptr)
+            {// We are using OpenXinput, check for the max controller count.
+                XinputMaxControllerCount = pfnOpenXInputGetMaxControllerCount_t();
+            }
+
+            pOpenXInputGetDeviceUSBIds = (OpenXInputGetDeviceUSBIds_t*)GetProcAddress(hXinput, "OpenXInputGetDeviceUSBIds");
+            pOpenXInputGetStateFull = (OpenXInputGetStateFull_t*)GetProcAddress(hXinput, "OpenXInputGetStateFull");
         }
 
-        pOpenXInputGetDeviceUSBIds = (OpenXInputGetDeviceUSBIds_t*)GetProcAddress(hXinput, "OpenXInputGetDeviceUSBIds");
-        pOpenXInputGetStateFull = (OpenXInputGetStateFull_t*)GetProcAddress(hXinput, "OpenXInputGetStateFull");
-    }
+        devices = std::make_unique<XInputDevice_t[]>(XinputMaxControllerCount);
+        memset(devices.get(), 0, sizeof(XInputDevice_t) * XinputMaxControllerCount);
 
-    devices = std::make_unique<XInputDevice_t[]>(XinputMaxControllerCount);
-    memset(devices.get(), 0, sizeof(XInputDevice_t) * XinputMaxControllerCount);
-    
-    for (int i = 0; i < XinputMaxControllerCount; ++i)
+        for (int i = 0; i < XinputMaxControllerCount; ++i)
+        {
+            devices[i].deviceIndex = i;
+            devices[i].deadzone = 0;
+        }
+        return 0;
+    }
+    catch (...) 
     {
-        devices[i].deviceIndex = i;
+        return 1; // error
     }
-
-    return 0;
 }
 
 fn_export double gamepad_oxi_update()
 {
-    for (int i = 0; i < XinputMaxControllerCount; i++)
+    try 
     {
-        XInputDevice_t& controller = devices[i];
-        if (controller.connected)
+        for (int i = 0; i < XinputMaxControllerCount; i++)
         {
-            OnDeviceInfoChange(controller);
-        }
-
-        if ((pOpenXInputGetStateFull == nullptr ? OpenXInputGetStateEx(i, &controller.state.XinputState) : pOpenXInputGetStateFull(i, &controller.state)) == ERROR_SUCCESS)
-        {
-            if (!controller.connected)
+            XInputDevice_t& controller = devices[i];
+            if (controller.connected)
             {
-                OnDeviceConnect(controller);
+                OnDeviceInfoChange(controller);
+            }
+
+            if ((pOpenXInputGetStateFull == nullptr ? OpenXInputGetStateEx(i, &controller.state.XinputState) : pOpenXInputGetStateFull(i, &controller.state)) == ERROR_SUCCESS)
+            {
+                if (!controller.connected)
+                {
+                    OnDeviceConnect(controller);
+                }
+            }
+            else
+            {
+                OnDeviceDisconnect(controller);
             }
         }
-        else
-        {
-            OnDeviceDisconnect(controller);
-        }
+        return 0;
     }
-    return 0;
+    catch (...) 
+    {
+        return 1; // error
+    }
 }
 
 fn_export double gamepad_oxi_quit() 
 {
-    FreeLibrary(hXinput);
-    return 0;
+    try 
+    {
+        FreeLibrary(hXinput);
+        return 0;
+    }
+    catch (...) 
+    {
+        return 1; // error
+    }
+    
 }
 
 fn_export double gamepad_button_check_oxi(double device, double button)
@@ -312,8 +335,35 @@ fn_export double gamepad_button_check_released_oxi(double device, double button)
 
 fn_export double gamepad_set_axis_deadzone_oxi(double device, double deadzone)
 {
-    XInputDevice_t& controller = devices[device];
-    controller.deadzone = deadzone;
+    try 
+    {
+        if (deadzone > 1) 
+        { 
+            deadzone = 1; 
+        }
+        else if (deadzone < 0) 
+        { 
+            deadzone = 0;
+        }
+        devices[device].deadzone = deadzone;
+    }
+    catch (...)
+    {
+
+    }
+    return 0;
+}
+
+fn_export double gamepad_get_axis_deadzone_oxi(double device)
+{
+    try
+    {
+        return devices[device].deadzone;
+    }
+    catch (...)
+    {
+        
+    }
     return 0;
 }
 
@@ -345,4 +395,107 @@ fn_export double gamepad_axis_value_oxi(double device, double axis)
     }
     return 0;
 }
+
+fn_export double gamepad_get_device_count_oxi()
+{
+    try
+    {
+        double count = 0;
+        for (int i = 0; i < XinputMaxControllerCount; ++i)
+        {
+            count += devices[i].connected;
+        }
+        return count;
+    }
+    catch (...)
+    {
+
+    }
+    return 0;
+}
+
+fn_export double gamepad_is_connected_oxi(double device)
+{
+    try
+    {
+        return devices[device].connected;
+    }
+    catch (...)
+    {
+
+    }
+    return 0;
+}
+
+fn_export double gamepad_button_value_oxi(double device, double button)
+{
+    try
+    {
+        GameMakerGamepadButtonIDs gp_button = (GameMakerGamepadButtonIDs)(int)button;
+        XInputDevice_t& controller = devices[device];
+        if (controller.connected)
+        {
+            switch (gp_button)
+            {
+                case gp_face1: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0);
+                case gp_face2: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0);
+                case gp_face3: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0);
+                case gp_face4: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0);
+                case gp_shoulderl: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0);
+                case gp_shoulderr: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0);
+                case gp_shoulderlb: return (controller.state.XinputState.Gamepad.bLeftTrigger);
+                case gp_shoulderrb: return (controller.state.XinputState.Gamepad.bRightTrigger);
+                case gp_padu: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0);
+                case gp_padd: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0);
+                case gp_padl: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0);
+                case gp_padr: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0);
+                case gp_start: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0);
+                case gp_select: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0);
+                case gp_stickl: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0);
+                case gp_stickr: return ((controller.state.XinputState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0);
+                default: return 0;
+            }
+        }
+    }
+    catch (...)
+    {
+
+    }
+    return 0;
+}
+
+fn_export double gamepad_set_vibration_oxi(double device, double leftMotor, double rightMotor) 
+{
+    try
+    {
+        if (leftMotor > 1) 
+        { 
+            leftMotor = 1; 
+        }
+        else if (leftMotor < 0) 
+        { 
+            leftMotor = 0; 
+        }
+
+        if (rightMotor > 1) 
+        { 
+            rightMotor = 1; 
+        }
+        else if (rightMotor < 0) 
+        { 
+            rightMotor = 0; 
+        }
+        XInputDevice_t& controller = devices[device];
+        XINPUT_VIBRATION vibrate{};
+        vibrate.wLeftMotorSpeed = leftMotor * GAMEPAD_VIBRATE_MAX;
+        vibrate.wRightMotorSpeed = rightMotor * GAMEPAD_VIBRATE_MAX;
+        OpenXInputSetState(controller.deviceIndex, &vibrate);
+    }
+    catch(...)
+    {
+
+    }
+    return 0;
+}
+
 #pragma endregion Gamemaker_Extension_Code
