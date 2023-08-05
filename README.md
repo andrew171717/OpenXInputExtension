@@ -26,7 +26,7 @@ Other Functions:
 - `gamepad_is_connected_oxi()`
 - `gamepad_set_vibration_oxi(deviceIndex, leftMotor, rightMotor)`
 
-Parameter for the above functions:
+Parameters for the above functions:
 - `deviceIndex`: `0`-`7`
 - `axisIndex`: `gp_axislh`, `gp_axislv`, `gp_axisrh`, `gp_axisrv`
 - `buttonIndex`: `gp_face1`, `gp_face2`, `gp_face3`, `gp_face4`, `gp_shoulderl`, `gp_shoulderr`, `gp_shoulderlb`, `gp_shoulderrb`, `gp_padu`, `gp_padd`, `gp_padl`, `gp_padr`, `gp_start`, `gp_select`, `gp_stickl`, `gp_stickr`
