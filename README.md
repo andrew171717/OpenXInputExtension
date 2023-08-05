@@ -1,22 +1,43 @@
 # GameMaker OpenXInputExtension
-An open-source extension to be used with GameMaker to allow for more than 4 XInput devices. The current version of this project is limited on what it can do, but I plan to flesh it out over the next coming weeks. I have tested this extension with 6 XInput controllers, but it should work with up to 8.
+An open-source extension to be used with GameMaker to allow for up to 8 XInput devices. This project contains replacement functions for the majority of stock gamepad functions found within gamemaker. Each replacement function is designed to work exactly like the stock GameMaker gamepad functions. (The current release it setup to support 8 controllers, but this can be extended by rebuilding the OpenXInput with a larger number set and then replacing the OpenXInput1_4.dll within this extension with it.)
 
-# Usage
+## Usage
 Import the local package to your project.
 
 On game start, call `gamepad_oxi_init()`.
 
 At the start of each step (Begin Step), call `gamepad_oxi_update()`.
 
-Button functions: `gamepad_button_check_oxi(deviceIndex, buttonIndex)`, `gamepad_button_check_pressed_oxi(deviceIndex, buttonIndex)`, and `gamepad_button_check_released_oxi(deviceIndex, buttonIndex)` .
-- `deviceIndex`: `0`-`7` (the current release it setup to support 8 controllers, but this can be extended by rebuilding the OpenXInput with a larger number set.)
-- `buttonIndex`: `gp_face1`, `gp_face2`, `gp_face3`, `gp_face4`, `gp_shoulderl`, `gp_shoulderr`, `gp_shoulderlb`, `gp_shoulderrb`, `gp_padu`, `gp_padd`, `gp_padl`, `gp_padr`, `gp_start`, `gp_select`, `gp_stickl`, `gp_stickr`
-
-Axis Functions: `gamepad_set_axis_deadzone_oxi(deviceIndex, deadzone)` and  `gamepad_axis_value_oxi(deviceIndex, axisIndex)`
-- `deviceIndex`: `0`-`7` (the current release it setup to support 8 controllers, but this can be extended by rebuilding the OpenXInput with a larger number set.)
-- `axisIndex`: `gp_axislh`, `gp_axislv`, `gp_axisrh`, `gp_axisrv`
-
 On game end, call `gamepad_oxi_quit()`.
+
+Button Functions: 
+- `gamepad_button_check_oxi(deviceIndex, buttonIndex)`
+- `gamepad_button_check_pressed_oxi(deviceIndex, buttonIndex)`
+- `gamepad_button_check_released_oxi(deviceIndex, buttonIndex)`
+- `gamepad_button_value_oxi(deviceIndex, buttonIndex)`
+
+Axis Functions: 
+- `gamepad_get_axis_deadzone_oxi(deviceIndex)`
+- `gamepad_set_axis_deadzone_oxi(deviceIndex, deadzone)`
+- `gamepad_axis_value_oxi(deviceIndex, axisIndex)`
+   
+Other Functions:
+- `gamepad_get_device_count_oxi()`
+- `gamepad_is_connected_oxi()`
+- `gamepad_set_vibration_oxi(deviceIndex, leftMotor, rightMotor)`
+
+Parameter for the above functions:
+- `deviceIndex`: `0`-`7`
+- `axisIndex`: `gp_axislh`, `gp_axislv`, `gp_axisrh`, `gp_axisrv`
+- `buttonIndex`: `gp_face1`, `gp_face2`, `gp_face3`, `gp_face4`, `gp_shoulderl`, `gp_shoulderr`, `gp_shoulderlb`, `gp_shoulderrb`, `gp_padu`, `gp_padd`, `gp_padl`, `gp_padr`, `gp_start`, `gp_select`, `gp_stickl`, `gp_stickr`
+- `leftMotor`: `0.0`-`1.0`
+- `rightMotor`: `0.0`-`1.0`
+
+## Example GameMaker Project
+Within the folder OpenXInputExtensionExample, you will find a GameMaker project that uses every function found within this extension. 
+When ran, you will see the following:
+![Example](https://github.com/andrew171717/OpenXInputExtension/assets/25375491/a532b104-965e-4d05-b421-d8f6a587caea)
+
 
 ## Building Source Instructions
 - Step 1: Download the OpenXInput1_4 code from [here](https://github.com/Nemirtingas/OpenXinput/tree/OpenXinput1_4)
