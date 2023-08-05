@@ -384,9 +384,7 @@ fn_export double gamepad_axis_value_oxi(double device, double axis)
                 case gp_axisrv: normalizedValue = -((double)controller.state.XinputState.Gamepad.sThumbRY / (double)GAMEPAD_STICK_MAX); break;
                 default: return 0;
             }
-
-            if (std::abs(normalizedValue) < controller.deadzone) { return 0; }
-            return normalizedValue;
+            return (abs(normalizedValue) < controller.deadzone) ? 0 : (((normalizedValue > 0) - (normalizedValue < 0)) * ((abs(normalizedValue) - controller.deadzone) / (1 - controller.deadzone)));
         }
     }
     catch (...)
@@ -401,9 +399,12 @@ fn_export double gamepad_get_device_count_oxi()
     try
     {
         double count = 0;
-        for (int i = 0; i < XinputMaxControllerCount; ++i)
+        for (int i = 0; i < XinputMaxControllerCount; i++)
         {
-            count += devices[i].connected;
+            if (devices[i].connected) 
+            {
+                count += 1;
+            }
         }
         return count;
     }
