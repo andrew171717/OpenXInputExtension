@@ -23,7 +23,7 @@ Axis Functions:
    
 Other Functions:
 - `gamepad_get_device_count_oxi()`
-- `gamepad_is_connected_oxi()`
+- `gamepad_is_connected_oxi(deviceIndex)`
 - `gamepad_set_vibration_oxi(deviceIndex, leftMotor, rightMotor)`
 
 Parameters for the above functions:
