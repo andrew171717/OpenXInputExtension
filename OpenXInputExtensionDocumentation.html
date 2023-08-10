@@ -1,0 +1,75 @@
+<html><head><style>body {
+   background-color: #282828;
+   color: #cfcfcf;
+   font-family: 'Open Sans';
+}
+
+h1 {
+   padding: 5px;
+   border-radius: 5px;
+   color: white;
+   background-color: #039E5C;
+}
+
+h2 {
+   padding: 5px;
+   border-radius: 5px;
+   color: white;
+   background-color: #039E5C;
+}
+
+a {
+   color: #04de80;
+}
+
+code {
+    font-family: 'Open Sans';
+    background: #181818;
+    color: #cfcfcf;
+    margin: 5px;
+    border-radius: 5px;
+    padding: 1px;
+}
+</style></head><body><h1 id="gamemaker-openxinputextension">GameMaker OpenXInputExtension</h1>
+<p>An open-source extension to be used with GameMaker to allow for up to 8 XInput devices. This project contains replacement functions for the majority of stock gamepad functions found within gamemaker. Each replacement function is designed to work exactly like the stock GameMaker gamepad functions. (The current release it setup to support 8 controllers, but this can be extended by rebuilding the OpenXInput with a larger number set and then replacing the OpenXInput1_4.dll within this extension with it.)</p>
+<h2 id="usage">Usage</h2>
+<p>Import the local package to your project.</p>
+<p>On game start, call <code>gamepad_oxi_init()</code>.</p>
+<p>At the start of each step (Begin Step), call <code>gamepad_oxi_update()</code>.</p>
+<p>On game end, call <code>gamepad_oxi_quit()</code>.</p>
+<p>Button Functions: </p>
+<ul>
+<li><code>gamepad_button_check_oxi(deviceIndex, buttonIndex)</code></li>
+<li><code>gamepad_button_check_pressed_oxi(deviceIndex, buttonIndex)</code></li>
+<li><code>gamepad_button_check_released_oxi(deviceIndex, buttonIndex)</code></li>
+<li><code>gamepad_button_value_oxi(deviceIndex, buttonIndex)</code></li>
+</ul>
+<p>Axis Functions: </p>
+<ul>
+<li><code>gamepad_get_axis_deadzone_oxi(deviceIndex)</code></li>
+<li><code>gamepad_set_axis_deadzone_oxi(deviceIndex, deadzone)</code></li>
+<li><code>gamepad_axis_value_oxi(deviceIndex, axisIndex)</code></li>
+</ul>
+<p>Other Functions:</p>
+<ul>
+<li><code>gamepad_get_device_count_oxi()</code></li>
+<li><code>gamepad_is_connected_oxi(deviceIndex)</code></li>
+<li><code>gamepad_set_vibration_oxi(deviceIndex, leftMotor, rightMotor)</code></li>
+</ul>
+<p>Parameters for the above functions:</p>
+<ul>
+<li>deviceIndex: <code>0-7</code></li>
+<li>axisIndex: <code>gp_axislh, gp_axislv, gp_axisrh, gp_axisrv</code></li>
+<li>buttonIndex: <code>gp_face1, gp_face2, gp_face3, gp_face4, gp_shoulderl, gp_shoulderr, gp_shoulderlb, gp_shoulderrb, gp_padu, gp_padd, gp_padl, gp_padr, gp_start, gp_select, gp_stickl, gp_stickr</code></li>
+<li>leftMotor: <code>0.0-1.0</code></li>
+<li>rightMotor: <code>0.0-1.0</code></li>
+</ul>
+<h2 id="links">Links</h2>
+<ul>
+<li><a href="https://github.com/andrew171717/OpenXInputExtension">Github Repo</a></li>
+<li><a href="https://forum.gamemaker.io/index.php?threads/openxinputextension-allows-for-8-xinput-devices-to-be-used-on-windows-game-exports.104823/">GameMaker Forum Post</a></li>
+</ul>
+<h2 id="more-details">More Details</h2>
+<p>This extension relys on the open-source project OpenXInput which can be found <a href="https://github.com/Nemirtingas/OpenXinput/tree/OpenXinput1_4">here</a>.</p>
+<p>There is a build of OpenXinput&#39;s dll (OpenXinput1_4.dll, originally named Xinput1_4.dll) within the .yymaps file found within the release of this project. This was done to help those who do not wish to rebuild the dll themselves. However, I do encourage you to download and build <a href="https://github.com/Nemirtingas/OpenXinput/tree/OpenXinput1_4">OpenXInput</a> if you are familiar with C++ and CMake.</p>
+</body></html>
