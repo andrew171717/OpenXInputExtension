@@ -29,6 +29,7 @@ struct XInputDevice_t
     XINPUT_BATTERY_INFORMATION battery;
     OPENXINPUT_STATE_FULL oldState;
     OPENXINPUT_STATE_FULL state;
+    XINPUT_VIBRATION vibrate;
     WORD vendorId;
     WORD productId;
     WORD inputId;
@@ -51,6 +52,11 @@ void OnDeviceConnect(XInputDevice_t& device)
     memset(&device.capabilities, 0, sizeof(device.capabilities));
     memset(&device.oldState, 0, sizeof(device.oldState));
     memset(&device.state, 0, sizeof(device.state));
+    memset(&device.vibrate, 0, sizeof(device.vibrate));
+    XINPUT_VIBRATION defaultVibrate{};
+    defaultVibrate.wLeftMotorSpeed = 0;
+    defaultVibrate.wRightMotorSpeed = 0;
+    device.vibrate = defaultVibrate;
 
     OpenXInputGetCapabilitiesEx(1, device.deviceIndex, XINPUT_FLAG_GAMEPAD, &device.capabilities);
 
@@ -185,6 +191,7 @@ fn_export double gamepad_oxi_update()
             XInputDevice_t& controller = devices[i];
             if (controller.connected)
             {
+                OpenXInputSetState(controller.deviceIndex, &controller.vibrate);
                 OnDeviceInfoChange(controller);
             }
 
@@ -487,10 +494,9 @@ fn_export double gamepad_set_vibration_oxi(double device, double leftMotor, doub
             rightMotor = 0; 
         }
         XInputDevice_t& controller = devices[device];
-        XINPUT_VIBRATION vibrate{};
-        vibrate.wLeftMotorSpeed = leftMotor * GAMEPAD_VIBRATE_MAX;
-        vibrate.wRightMotorSpeed = rightMotor * GAMEPAD_VIBRATE_MAX;
-        OpenXInputSetState(controller.deviceIndex, &vibrate);
+        controller.vibrate.wLeftMotorSpeed = leftMotor * GAMEPAD_VIBRATE_MAX;
+        controller.vibrate.wRightMotorSpeed = rightMotor * GAMEPAD_VIBRATE_MAX;
+        OpenXInputSetState(controller.deviceIndex, &controller.vibrate);
     }
     catch(...)
     {
