@@ -1,5 +1,5 @@
 # GameMaker OpenXInputExtension
-An open-source extension to be used with GameMaker to allow for up to 8 XInput devices. This project contains replacement functions for the majority of stock gamepad functions found within gamemaker. Each replacement function is designed to work exactly like the stock GameMaker gamepad functions. (The current release it setup to support 8 controllers, but this can be extended by rebuilding the OpenXInput with a larger number set and then replacing the OpenXInput1_4.dll within this extension with it.)
+An open-source extension to be used with GameMaker to allow for up to 8 XInput devices. This project contains replacement functions for the majority of stock gamepad functions found within gamemaker. Each replacement function is designed to work exactly like the stock GameMaker gamepad functions. (The current release is setup to support 8 controllers, but this can be extended by rebuilding the OpenXInput with a larger number set and then replacing the OpenXInput1_4.dll within this extension with it.)
 
 Important Note: When using this extension, make sure to run your game with the YYC output option selected. VM output will not use the extension's dll properly. (VM will only allow 4 XInput devices. YYC will allow 8 XInput devices.)
 
